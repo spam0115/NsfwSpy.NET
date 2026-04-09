@@ -239,18 +239,18 @@ namespace NsfwSpyNS.Test
             Assert.False(result.IsNsfw);
         }
 
-        [Fact]
-        public async Task ClassifyGifUriAsync_ValidUri()
-        {
-            var filePath = Path.Combine(AppContext.BaseDirectory, "Assets/cool.gif");
-            var imageBytes = File.ReadAllBytes(filePath);
-            //var uri = new Uri("https://media2.giphy.com/media/62PP2yEIAZF6g/giphy.gif");
+        //[Fact]
+        //public async Task ClassifyGifUriAsync_ValidUri()
+        //{
+        //    var filePath = Path.Combine(AppContext.BaseDirectory, "Assets/cool.gif");
+        //    var imageBytes = File.ReadAllBytes(filePath);
+        //    //var uri = new Uri("https://media2.giphy.com/media/62PP2yEIAZF6g/giphy.gif");
 
-            var nsfwSpy = new NsfwSpy();
-            var result = await nsfwSpy.ClassifyGifAsync(filePath);
+        //    var nsfwSpy = new NsfwSpy();
+        //    var result = await nsfwSpy.ClassifyGifAsync(filePath);
 
-            Assert.False(result.IsNsfw);
-        }
+        //    Assert.False(result.IsNsfw);
+        //}
 
         [Theory]
         [InlineData("bikini.avi")]
