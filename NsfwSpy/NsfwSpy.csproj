@@ -18,11 +18,11 @@
 
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.11.1" />
-    <PackageReference Include="Microsoft.ML" Version="1.7.1" />
-    <PackageReference Include="Microsoft.ML.Vision" Version="1.7.1" />
+    <PackageReference Include="Microsoft.ML" Version="5.0.0" />
+    <PackageReference Include="Microsoft.ML.Vision" Version="5.0.0" />
     <PackageReference Include="Mime" Version="3.8.0" />
-    <PackageReference Include="SciSharp.TensorFlow.Redist-Linux-GPU" Version="2.3.1" />
-    <PackageReference Include="SciSharp.TensorFlow.Redist-Windows-GPU" Version="2.3.1" />
+    <PackageReference Include="SciSharp.TensorFlow.Redist-Linux-GPU" Version="2.11.1" />
+    <PackageReference Include="SciSharp.TensorFlow.Redist-Windows-GPU" Version="2.10.3" />
   </ItemGroup>
 
   <ItemGroup>
