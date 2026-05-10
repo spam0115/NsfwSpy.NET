@@ -1,5 +1,6 @@
 ﻿using HeyRed.Mime;
 using ImageMagick;
+using ImageMagick.Formats;
 using Microsoft.ML;
 using System;
 using System.Collections.Concurrent;
@@ -31,7 +32,7 @@ namespace NsfwSpyNS
         /// <summary>
         /// Classify an image from a byte array.
         /// </summary>
-        /// <param name="imageData">The image content read as a byte array.</param>
+        /// <param name="imageData">The image content read as a byte array.  Note: doesn't support BMP formats.</param>
         /// <returns>A NsfwSpyResult that indicates the predicted value and scores for the 5 categories of classification.</returns>
         public NsfwSpyResult ClassifyImage(byte[] imageData)
         {
@@ -40,7 +41,7 @@ namespace NsfwSpyNS
             {
                 using (MagickImage image = new MagickImage(imageData))
                 {
-                    imageData = image.ToByteArray(MagickFormat.Png);
+                    imageData = ImageToUncompressedPng(image);
                 }
             }
 
@@ -49,6 +50,26 @@ namespace NsfwSpyNS
             var predictionEngine = mlContext.Model.CreatePredictionEngine<ModelInput, ModelOutput>(_model);
             var modelOutput = predictionEngine.Predict(modelInput);
             return new NsfwSpyResult(modelOutput);
+        }
+
+        public static byte[] ImageToUncompressedPng(MagickImage image)
+        {
+            byte[] imageData;
+            // Disable PNG compression
+            var pngDefines = new PngWriteDefines
+            {
+                CompressionLevel = 0, // "no compression" (store)
+                CompressionFilter = PngCompressionFilter.None,
+                CompressionStrategy = PngCompressionStrategy.Default
+            };
+            using (var ms = new MemoryStream())
+            {
+                image.Format = MagickFormat.Png;   // ensure PNG encoder
+                image.Write(ms, pngDefines);       // write to memory, not disk
+                imageData = ms.ToArray();
+            }
+
+            return imageData;
         }
 
         /// <summary>
