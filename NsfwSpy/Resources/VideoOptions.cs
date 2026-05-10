@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace NsfwSpyNS
+﻿namespace NsfwSpyNS
 {
     /// <summary>
     /// Customise how the frames of a video file are classified.

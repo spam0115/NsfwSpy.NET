@@ -46,7 +46,7 @@ namespace NsfwSpyNS.Train
                 FeatureColumnName = "Image",
                 LabelColumnName = "LabelAsKey",
                 ValidationSet = validationSet,
-                Arch = ImageClassificationTrainer.Architecture.ResnetV250,
+                Arch = ImageClassificationTrainer.Architecture.ResnetV250, //ResnetV250 (~25M parameters), ResnetV2101 (~44M parameters)
                 MetricsCallback = (metrics) => Console.WriteLine(metrics),
                 TestOnTrainSet = true,
                 ReuseTrainSetBottleneckCachedValues = true,
