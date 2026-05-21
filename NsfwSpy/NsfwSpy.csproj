@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Magick.NET-Q8-x64" Version="14.13.0" />
+    <PackageReference Include="Magick.NET-Q8-x64" Version="14.13.1" />
     <PackageReference Include="Microsoft.ML" Version="5.0.0" />
     <PackageReference Include="Microsoft.ML.Vision" Version="5.0.0" />
     <PackageReference Include="Mime" Version="3.8.0" />
