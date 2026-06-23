@@ -25,6 +25,8 @@ namespace NsfwSpyNS
         /// </summary>
         public bool IsNsfw => Frames.Any(f => f.Value.IsNsfw);
 
+        public byte[]? Hash { get; set; } = new byte[16];
+        
         public NsfwSpyFramesResult(Dictionary<int, NsfwSpyResult> frames)
         {
             Frames = frames;
