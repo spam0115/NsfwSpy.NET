@@ -13,21 +13,28 @@ namespace NsfwSpyNS
         /// <summary>
         /// The NsfwSpyResults for each of the frames classified with the key being the frame index.
         /// </summary>
-        public Dictionary<int, NsfwSpyResult> Frames { get; set; }
+        public IEnumerable<NsfwSpyResult> Frames { get; set; }
 
         /// <summary>
         /// The amount of frames classified.
         /// </summary>
-        public int FrameCount => Frames.Count;
+        private int _FrameCount = 0;
+        public int FrameCount {
+            get
+            {
+                if (_FrameCount == 0) _FrameCount = Frames.Count();
+                return _FrameCount;
+            }
+        }
 
         /// <summary>
         /// True if any of the frames have been classified as NSFW.
         /// </summary>
-        public bool IsNsfw => Frames.Any(f => f.Value.IsNsfw);
+        public bool IsNsfw => Frames.Any(f => f.IsNsfw);
 
         public byte[]? Hash { get; set; } = new byte[16];
         
-        public NsfwSpyFramesResult(Dictionary<int, NsfwSpyResult> frames)
+        public NsfwSpyFramesResult(IEnumerable<NsfwSpyResult> frames)
         {
             Frames = frames;
         }

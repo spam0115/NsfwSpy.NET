@@ -193,8 +193,8 @@ namespace NsfwSpyNS
                 });
             }
 
-            var resultDictionary = results.OrderBy(r => r.Key).ToDictionary(r => r.Key, r => r.Value);
-            var gifResult = new NsfwSpyFramesResult(resultDictionary);
+            //var resultDictionary = results.OrderBy(r => r.Key).ToDictionary(r => r.Key, r => r.Value);
+            var gifResult = new NsfwSpyFramesResult(results.Values);
             return gifResult;
         }
 
@@ -297,8 +297,8 @@ namespace NsfwSpyNS
                 });
             }
 
-            var resultDictionary = results.OrderBy(r => r.Key).ToDictionary(r => r.Key, r => r.Value);
-            var gifResult = new NsfwSpyFramesResult(resultDictionary);
+            //var resultDictionary = results.OrderBy(r => r.Key).ToDictionary(r => r.Key, r => r.Value);
+            var gifResult = new NsfwSpyFramesResult(results.Values);
             return gifResult;
         }
 
