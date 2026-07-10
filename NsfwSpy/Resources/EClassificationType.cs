@@ -8,9 +8,10 @@ namespace NsfwSpyNS
 {
     internal enum EClassificationType
     {
-        Hentai = 0,
-        Neutral = 1,
-        Pornography = 2,
-        Sexy = 3
+        Drawings = 0,
+        Hentai = 1,
+        Neutral = 2,
+        Pornography = 3,
+        Sexy = 4
     }
 }
