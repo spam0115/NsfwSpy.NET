@@ -75,6 +75,18 @@ namespace NsfwSpyNS.Test
             Assert.Equal("Neutral", result.PredictedLabel);
         }
 
+        [Theory]
+        [InlineData("skinny-fitness-junky-gina-gerson.webp")]
+        public void ClassifyImage_Porn(string filename)
+        {
+            var filePath = Path.Combine(AppContext.BaseDirectory, $@"Assets/{filename}");
+
+            var nsfwSpy = new NsfwSpy();
+            var result = nsfwSpy.ClassifyImage(filePath);
+
+            Assert.Equal("Pornography", result.PredictedLabel);
+        }
+
         [Fact]
         public void ClassifyImageFilePath_InvalidFilePath()
         {

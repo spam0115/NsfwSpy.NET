@@ -15,6 +15,7 @@ namespace NsfwSpyNS.PerformanceTesting
 
             var classificationTypes = new[]
             {
+                "Drawings",
                 "Hentai",
                 "Neutral",
                 "Pornography",
