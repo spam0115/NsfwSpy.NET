@@ -1,7 +1,8 @@
 ﻿using HeyRed.Mime;
 using ImageMagick;
 using ImageMagick.Formats;
-using Microsoft.ML;
+using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.Tensors;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -17,41 +18,28 @@ namespace NsfwSpyNS
     /// </summary>
     public class NsfwSpy : INsfwSpy
     {
-        private static ITransformer _model;
+        private const int ImageSize = 224;
+        private const float RescaleFactor = 1f / 255f;
+        private const float Mean = 0.5f;
+        private const float Std = 0.5f;
+
+        private static InferenceSession _session;
 
         public NsfwSpy()
         {
-            if (_model == null)
+            if (_session == null)
             {
-                var modelPath = Path.Combine(AppContext.BaseDirectory, "NsfwSpyModel.zip");
-                var mlContext = new MLContext();
-                _model = mlContext.Model.Load(modelPath, out var modelInputSchema);
+                var modelPath = Path.Combine(AppContext.BaseDirectory, "model.onnx");
+                var options = SessionOptions.MakeSessionOptionWithCudaProvider(0); // device 0
+                _session = new InferenceSession(modelPath);
             }
         }
 
         /// <summary>
-        /// Classify an image from a byte array.
+        /// Convert a MagickImage to an uncompressed PNG byte array.
         /// </summary>
-        /// <param name="imageData">The image content read as a byte array.  Note: doesn't support BMP formats.</param>
-        /// <returns>A NsfwSpyResult that indicates the predicted value and scores for the 5 categories of classification.</returns>
-        public NsfwSpyResult ClassifyImage(byte[] imageData)
-        {
-            var fileType = MimeGuesser.GuessFileType(imageData);
-            if (fileType.Extension == "webp")
-            {
-                using (MagickImage image = new MagickImage(imageData))
-                {
-                    imageData = ImageToUncompressedPng(image);
-                }
-            }
-
-            var modelInput = new ModelInput(imageData);
-            var mlContext = new MLContext();
-            var predictionEngine = mlContext.Model.CreatePredictionEngine<ModelInput, ModelOutput>(_model);
-            var modelOutput = predictionEngine.Predict(modelInput);
-            return new NsfwSpyResult(modelOutput);
-        }
-
+        /// <param name="image"></param>
+        /// <returns></returns>
         public static byte[] ImageToUncompressedPng(MagickImage image)
         {
             byte[] imageData;
@@ -70,6 +58,89 @@ namespace NsfwSpyNS
             }
 
             return imageData;
+        }
+
+        /// <summary>
+        /// Classify an image from a byte array.
+        /// </summary>
+        /// <param name="imageData">The image content read as a byte array.  Note: doesn't support BMP formats.</param>
+        /// <returns>A NsfwSpyResult that indicates the predicted value and scores for the 5 categories of classification.</returns>
+        public NsfwSpyResult ClassifyImage(byte[] imageData)
+        {
+            var tensor = PreprocessImage(imageData);
+            var scores = RunInference(tensor);
+            return new NsfwSpyResult(scores);
+        }
+
+        private static DenseTensor<float> PreprocessImage(byte[] imageData)
+        {
+            try
+            {
+                using var image = new MagickImage(imageData);
+                image.BackgroundColor = MagickColors.White;
+                image.Alpha(AlphaOption.Remove);
+
+                // Resize maintaining aspect ratio so the longest side fits ImageSize, then
+                // letterbox-pad the shorter side to reach exactly ImageSize x ImageSize.
+                image.Resize(ImageSize, ImageSize);
+                image.Extent(ImageSize, ImageSize, Gravity.Center);
+
+                using var pixels = image.GetPixels();
+                var bytePixels = pixels.ToByteArray(PixelMapping.RGB);
+                if (bytePixels == null || bytePixels.Length != ImageSize * ImageSize * 3)
+                {
+                    throw new ClassificationFailedException("Classification of the file failed. Make sure the file is a valid image format (jpg, png, gif etc) and has been loaded correctly.");
+                }
+
+                var tensor = new DenseTensor<float>(new[] { 1, 3, ImageSize, ImageSize });
+
+                for (var y = 0; y < ImageSize; y++)
+                {
+                    for (var x = 0; x < ImageSize; x++)
+                    {
+                        var pixelIndex = (y * ImageSize + x) * 3;
+                        for (var c = 0; c < 3; c++)
+                        {
+                            var value = bytePixels[pixelIndex + c] * RescaleFactor;
+                            var normalized = (value - Mean) / Std;
+                            tensor[0, c, y, x] = normalized;
+                        }
+                    }
+                }
+
+                return tensor;
+            }
+            catch (ClassificationFailedException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw new ClassificationFailedException("Classification of the file failed. Make sure the file is a valid image format (jpg, png, gif etc) and has been loaded correctly.");
+            }
+        }
+
+        private static float[] RunInference(DenseTensor<float> tensor)
+        {
+            var inputName = _session.InputMetadata.Keys.First();
+            var inputs = new List<NamedOnnxValue>
+            {
+                NamedOnnxValue.CreateFromTensor(inputName, tensor)
+            };
+
+            using var results = _session.Run(inputs);
+            var output = results.First().AsTensor<float>();
+            var logits = output.ToArray();
+
+            return Softmax(logits);
+        }
+
+        private static float[] Softmax(float[] logits)
+        {
+            var max = logits.Max();
+            var exp = logits.Select(l => (float)Math.Exp(l - max)).ToArray();
+            var sum = exp.Sum();
+            return exp.Select(e => e / sum).ToArray();
         }
 
         /// <summary>

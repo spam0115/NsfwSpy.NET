@@ -19,11 +19,9 @@
 
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q8-x64" Version="14.13.1" />
-    <PackageReference Include="Microsoft.ML" Version="5.0.0" />
-    <PackageReference Include="Microsoft.ML.Vision" Version="5.0.0" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.27.0" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.27.0" />
     <PackageReference Include="Mime" Version="3.8.0" />
-    <PackageReference Include="SciSharp.TensorFlow.Redist-Linux-GPU" Version="2.11.1" />
-    <PackageReference Include="SciSharp.TensorFlow.Redist-Windows-GPU" Version="2.10.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,9 +40,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="NsfwSpyModel.zip">
+    <None Update="model.config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="model.onnx">
       <Pack>true</Pack>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PackageCopyToOutput>true</PackageCopyToOutput>
     </None>
   </ItemGroup>

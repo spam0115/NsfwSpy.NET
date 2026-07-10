@@ -12,6 +12,11 @@ namespace NsfwSpyNS
     public class NsfwSpyResult
     {
         /// <summary>
+        /// The drawings probability score between 0 and 1.
+        /// </summary>
+        public float Drawings { get; }
+
+        /// <summary>
         /// The hentai probability score between 0 and 1.
         /// </summary>
         public float Hentai { get; }
@@ -39,35 +44,48 @@ namespace NsfwSpyNS
         /// <summary>
         /// Whether the image is likely to be explicit. True if the sum of pornography, hentai and sexy is equal to or above 0.5.
         /// </summary>
-        public bool IsNsfw => Neutral < 0.5;
+        public bool IsNsfw => Hentai + Pornography + Sexy >= 0.5;
 
         public NsfwSpyResult()
         {
 
         }
 
-        internal NsfwSpyResult(ModelOutput modelOutput)
+        internal NsfwSpyResult(float[] scores)
         {
-            Hentai = modelOutput.Score[(int)EClassificationType.Hentai];
-            Neutral = modelOutput.Score[(int)EClassificationType.Neutral];
-            Pornography = modelOutput.Score[(int)EClassificationType.Pornography];
-            Sexy = modelOutput.Score[(int)EClassificationType.Sexy];
-            PredictedLabel = modelOutput.PredictedLabel;
+            Drawings = scores[(int)EClassificationType.Drawings];
+            Hentai = scores[(int)EClassificationType.Hentai];
+            Neutral = scores[(int)EClassificationType.Neutral];
+            Pornography = scores[(int)EClassificationType.Pornography];
+            Sexy = scores[(int)EClassificationType.Sexy];
 
-            if (Hentai + Neutral + Pornography + Sexy == 0)
+            var maxIndex = 0;
+            var max = scores[0];
+            for (var i = 1; i < scores.Length; i++)
+            {
+                if (scores[i] > max)
+                {
+                    max = scores[i];
+                    maxIndex = i;
+                }
+            }
+            PredictedLabel = ((EClassificationType)maxIndex).ToString();
+
+            if (Drawings + Hentai + Neutral + Pornography + Sexy == 0)
             {
                 throw new ClassificationFailedException("Classification of the file failed. Make sure the file is a valid image format (jpg, png, gif etc) and has been loaded correctly.");
             }
         }
 
         /// <summary>
-        /// Get the 5 classification types as a dictionary ordered by their score.
+        /// Get the classification types as a dictionary ordered by their score.
         /// </summary>
         /// <returns>Dictionary of the prediction scores.</returns>
         public Dictionary<string, float> ToDictionary()
         {
             var dictionary = new Dictionary<string, float>
             {
+                { "Drawings", Drawings },
                 { "Hentai", Hentai },
                 { "Neutral", Neutral },
                 { "Pornography", Pornography },
