@@ -87,6 +87,31 @@ namespace NsfwSpyNS.Test
             Assert.Equal("Pornography", result.PredictedLabel);
         }
 
+        [Theory]
+        [InlineData("hentai.webp")]
+        public void ClassifyImage_Hentai(string filename)
+        {
+            var filePath = Path.Combine(AppContext.BaseDirectory, $@"Assets/{filename}");
+
+            var nsfwSpy = new NsfwSpy();
+            var result = nsfwSpy.ClassifyImage(filePath);
+
+            Assert.Equal("Hentai", result.PredictedLabel);
+        }
+
+
+        [Theory]
+        [InlineData("drawing.webp")]
+        public void ClassifyImage_Drawing(string filename)
+        {
+            var filePath = Path.Combine(AppContext.BaseDirectory, $@"Assets/{filename}");
+
+            var nsfwSpy = new NsfwSpy();
+            var result = nsfwSpy.ClassifyImage(filePath);
+
+            Assert.Equal("Drawings", result.PredictedLabel);
+        }
+
         [Fact]
         public void ClassifyImageFilePath_InvalidFilePath()
         {
