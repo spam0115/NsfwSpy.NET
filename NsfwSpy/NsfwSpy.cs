@@ -30,8 +30,8 @@ namespace NsfwSpyNS
             if (_session == null)
             {
                 var modelPath = Path.Combine(AppContext.BaseDirectory, "model.onnx");
-                var options = SessionOptions.MakeSessionOptionWithCudaProvider(0); // device 0
-                _session = new InferenceSession(modelPath);
+                var options = SessionOptions.MakeSessionOptionWithCudaProvider(0);
+                _session = new InferenceSession(modelPath, options);
             }
         }
 
